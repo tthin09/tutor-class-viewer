@@ -1,0 +1,17 @@
+{
+  "name": "extra-class-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "vite build",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "google-auth-library": "^9.15.1"
+  },
+  "devDependencies": {
+    "vite": "^6.2.5"
+  }
+}
