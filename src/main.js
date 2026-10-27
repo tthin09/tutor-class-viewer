@@ -69,11 +69,12 @@ function renderMonth() {
     const date = new Date(start);
     date.setDate(start.getDate() + index);
     const outside = date.getMonth() !== visibleDate.getMonth();
+    const isToday = dayKey(date) === dayKey(new Date());
     const dayEvents = eventsOn(date).map((event) => {
       const eventIndex = events.indexOf(event);
       return `<button class="month-event" data-event="${eventIndex}" aria-label="${escapeHtml(`${event.summary || 'Sự kiện'} · ${formatRange(event)}`)}">${escapeHtml(formatRange(event))} ${escapeHtml(event.summary || 'Buổi học')}</button>`;
     }).join('');
-    dayCells.push(`<div class="month-day${outside ? ' outside' : ''}"><span class="date-number">${date.getDate()}</span>${dayEvents}</div>`);
+    dayCells.push(`<div class="month-day${outside ? ' outside' : ''}"><span class="date-number${isToday ? ' today' : ''}"${isToday ? ' aria-current="date"' : ''}>${date.getDate()}</span>${dayEvents}</div>`);
   }
 
   return `<section class="calendar" aria-label="Lịch tháng"><div class="weekday-row">${weekdays.map((day) => `<div class="weekday">${day}</div>`).join('')}</div><div class="month-days">${dayCells.join('')}</div></section>`;
@@ -87,9 +88,11 @@ function renderWeek() {
     return `<div class="weekday">${day}<br>${date.getDate()}</div>`;
   }).join('');
   const hours = Array.from({ length: 24 }, (_, hour) => `<div class="hour-label">${String(hour).padStart(2, '0')}:00</div>`).join('');
+  const now = new Date();
   const columns = weekdays.map((_, index) => {
     const date = new Date(start);
     date.setDate(start.getDate() + index);
+    const isToday = dayKey(date) === dayKey(now);
     const dayEvents = eventsOn(date).map((event) => {
       const eventIndex = events.indexOf(event);
       const eventStart = asDate(event.start);
@@ -99,7 +102,10 @@ function renderWeek() {
       const height = Math.max(22, (eventEnd - eventStart) / 60_000 * hourHeight / 60);
       return `<button class="week-event" style="top:${top}px;height:${height}px" data-event="${eventIndex}" aria-label="${escapeHtml(`${event.summary || 'Sự kiện'} · ${formatRange(event)}`)}"><span class="week-event-time">${escapeHtml(formatRange(event))}</span><br><span class="week-event-title">${escapeHtml(event.summary || 'Buổi học')}</span></button>`;
     }).join('');
-    return `<div class="week-day-column" style="grid-column:${index + 2};grid-row:1">${dayEvents}</div>`;
+    const currentTimeLine = isToday
+      ? `<div class="current-time-line" style="top:${(now.getHours() * 60 + now.getMinutes()) * hourHeight / 60}px" aria-hidden="true"></div>`
+      : '';
+    return `<div class="week-day-column${isToday ? ' today-column' : ''}" style="grid-column:${index + 2};grid-row:1">${currentTimeLine}${dayEvents}</div>`;
   }).join('');
   return `<section class="calendar week-calendar" aria-label="Lịch tuần"><div class="weekday-row"><div class="weekday"></div>${header}</div><div class="week-grid"><div class="hour-rail">${hours}</div>${columns}</div></section>`;
 }
