@@ -1,3 +1,6 @@
+const DAYS_IN_WEEK = 7;
+const CLASSES_PER_WEEK = 2;
+
 const eventDate = (value) => {
   if (value?.dateTime) return new Date(value.dateTime);
   if (value?.date) {
@@ -7,8 +10,43 @@ const eventDate = (value) => {
   return new Date(NaN);
 };
 
+function mondayOf(date) {
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  return monday;
+}
+
 function localDayNumber(date) {
   return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000;
+}
+
+export function countMissingClasses(events, now = new Date(), startDate = '2026-09-28') {
+  const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+  const start = new Date(startYear, startMonth - 1, startDay);
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 28);
+  let firstWeek = mondayOf(start);
+  if (firstWeek < start) firstWeek.setDate(firstWeek.getDate() + DAYS_IN_WEEK);
+  let lastWeek = mondayOf(end);
+  const lastSunday = new Date(lastWeek);
+  lastSunday.setDate(lastSunday.getDate() + DAYS_IN_WEEK - 1);
+  if (lastSunday > end) lastWeek.setDate(lastWeek.getDate() - DAYS_IN_WEEK);
+  const lastCompleteDay = new Date(lastWeek);
+  lastCompleteDay.setDate(lastCompleteDay.getDate() + DAYS_IN_WEEK - 1);
+
+  const completeWeeks = Math.max(0, Math.floor((localDayNumber(lastWeek) - localDayNumber(firstWeek)) / DAYS_IN_WEEK) + 1);
+  const weeklyCounts = new Map();
+  for (const event of events) {
+    const date = eventDate(event.start);
+    date.setHours(0, 0, 0, 0);
+    if (date < firstWeek || date > lastCompleteDay || Number.isNaN(date.getTime())) continue;
+    const week = mondayOf(date);
+    const key = localDayNumber(week);
+    weeklyCounts.set(key, (weeklyCounts.get(key) || 0) + 1);
+  }
+
+  const credited = [...weeklyCounts.values()].reduce((total, count) => total + Math.min(count, CLASSES_PER_WEEK), 0);
+  const expected = completeWeeks * CLASSES_PER_WEEK;
+  return Math.max(0, expected - credited);
 }
 
 export function findNextClass(events, now = new Date()) {

@@ -3,6 +3,7 @@
     "studentID": "0123456789abcdef",
     "name": "Tên học sinh",
     "calendarName": "Tên lịch",
-    "calendarId": "calendar-id@group.calendar.google.com"
+    "calendarId": "calendar-id@group.calendar.google.com",
+    "classCountStartDate": "2026-09-28"
   }
 ]

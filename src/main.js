@@ -1,5 +1,5 @@
 import './style.css';
-import { findNextClass, formatNextClass } from './calendar.js';
+import { countMissingClasses, findNextClass, formatNextClass } from './calendar.js';
 
 const app = document.querySelector('#app');
 const params = new URLSearchParams(location.search);
@@ -7,6 +7,7 @@ const studentID = params.get('studentID');
 const weekdays = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
 const hourHeight = 52;
 let studentName = '';
+let classCountStartDate = '2026-09-28';
 let events = [];
 let mode = 'month';
 let visibleDate = new Date();
@@ -126,7 +127,7 @@ function render() {
   }
 
   const monthLabel = `Tháng ${visibleDate.getMonth() + 1}/${visibleDate.getFullYear()}`;
-  app.innerHTML = `<div class="app-shell"><header class="topline"><div class="brand"><span class="brand-mark"></span>Lịch học Notebook</div><div class="subtle">Múi giờ theo thiết bị</div></header><section class="headline"><div><h1>Lịch học của ${escapeHtml(studentName)}</h1><p>Theo dõi lịch học của bạn</p></div>${renderNextClass()}</section><nav class="toolbar" aria-label="Điều khiển lịch"><div class="month-controls"><button class="button" data-action="previous" aria-label="${mode === 'month' ? 'Tháng trước' : 'Tuần trước'}">‹</button><span class="month-label">${monthLabel}</span><button class="button" data-action="next" aria-label="${mode === 'month' ? 'Tháng sau' : 'Tuần sau'}">›</button><button class="button" data-action="today">Hôm nay</button></div><div class="view-toggle" role="group" aria-label="Chế độ xem"><button class="button${mode === 'month' ? ' active' : ''}" data-view="month" aria-pressed="${mode === 'month'}">Tháng</button><button class="button${mode === 'week' ? ' active' : ''}" data-view="week" aria-pressed="${mode === 'week'}">Tuần</button></div></nav>${mode === 'month' ? renderMonth() : renderWeek()}${selectedEvent === null ? '' : modalMarkup(events[selectedEvent])}</div>`;
+  app.innerHTML = `<div class="app-shell"><header class="topline"><div class="brand"><span class="brand-mark"></span>Lịch học Notebook</div><div class="class-shortfall">Còn thiếu <strong>${countMissingClasses(events, new Date(), classCountStartDate)}</strong> buổi</div></header><section class="headline"><div><h1>Lịch học của ${escapeHtml(studentName)}</h1><p>Theo dõi lịch học của bạn</p></div>${renderNextClass()}</section><nav class="toolbar" aria-label="Điều khiển lịch"><div class="month-controls"><button class="button" data-action="previous" aria-label="${mode === 'month' ? 'Tháng trước' : 'Tuần trước'}">‹</button><span class="month-label">${monthLabel}</span><button class="button" data-action="next" aria-label="${mode === 'month' ? 'Tháng sau' : 'Tuần sau'}">›</button><button class="button" data-action="today">Hôm nay</button></div><div class="view-toggle" role="group" aria-label="Chế độ xem"><button class="button${mode === 'month' ? ' active' : ''}" data-view="month" aria-pressed="${mode === 'month'}">Tháng</button><button class="button${mode === 'week' ? ' active' : ''}" data-view="week" aria-pressed="${mode === 'week'}">Tuần</button></div></nav>${mode === 'month' ? renderMonth() : renderWeek()}${selectedEvent === null ? '' : modalMarkup(events[selectedEvent])}</div>`;
 
   app.querySelector('[data-action="previous"]').addEventListener('click', () => move(-1));
   app.querySelector('[data-action="next"]').addEventListener('click', () => move(1));
@@ -172,6 +173,7 @@ async function start() {
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Không tải được lịch học.');
     studentName = result.studentName;
+    classCountStartDate = result.classCountStartDate || '2026-09-28';
     events = result.events || [];
     render();
   } catch (error) {

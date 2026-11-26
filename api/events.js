@@ -69,6 +69,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       studentName: student.name,
       calendarName: student.calendarName,
+      classCountStartDate: student.classCountStartDate || '2026-09-28',
       timeZone: 'Asia/Ho_Chi_Minh',
       events: events.map(({ id, summary, description, location, start, end }) => ({
         id, summary, description, location, start, end,
