@@ -20,13 +20,14 @@ Danh sách local nằm trong `data/students.json`, chỉ API phía server đọc
   "studentID": "16 ký tự hex ngẫu nhiên",
   "name": "Tên hiển thị",
   "calendarName": "Tên lịch",
-  "calendarId": "calendar-id@group.calendar.google.com"
+  "calendarId": "calendar-id@group.calendar.google.com",
+  "classCountStartDate": "2026-09-28"
 }
 ```
 
-Để thêm học sinh, tạo ID bằng `node -e "console.log(require('node:crypto').randomBytes(8).toString('hex'))"`, rồi thêm tên và Calendar ID. Cấp quyền xem lịch cho service account nếu lịch không public. Link chia sẻ có dạng `/?studentID=<ID>`; người có link có thể xem lịch tương ứng, vì đây là link riêng tư chứ không phải đăng nhập.
+`classCountStartDate` là ngày bắt đầu tính số buổi, theo định dạng `YYYY-MM-DD`; có thể đặt riêng cho từng học sinh, mặc định là `2026-09-28`. Để thêm học sinh, tạo ID bằng `node -e "console.log(require('node:crypto').randomBytes(8).toString('hex'))"`, rồi thêm tên và Calendar ID. Cấp quyền xem lịch cho service account nếu lịch không public. Link chia sẻ có dạng `/?studentID=<ID>`; người có link có thể xem lịch tương ứng, vì đây là link riêng tư chứ không phải đăng nhập.
 
-Hiện đã cấu hình Khoa từ calendar link đã cung cấp. Cần bổ sung ba học sinh còn lại khi có tên và calendar link/ID của các em.
+Danh sách học sinh thực tế được lưu trong `data/students.json` hoặc biến môi trường `STUDENTS_JSON`; không đưa dữ liệu này lên Git.
 
 ## Deploy Vercel
 
